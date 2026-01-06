@@ -28,7 +28,7 @@ python -m venv venv
 ```bash
 On Windows:
 .\venv\Scripts\activate
-On macOS/Linux:
+# On macOS/Linux:
 source venv/bin/activate
 ```
 3. Install PyTorch with GPU Support: 
@@ -40,13 +40,18 @@ pip install torch torchvision torchaudio --index-url [https://download.pytorch.o
 ```bash
 pip install pandas numpy matplotlib openpyxl scikit-learn joblib
 ```
-4. ArcGIS API Configuration
-The data_fetcher.py script requires your ArcGIS credentials to fetch satellite imagery:
-```bash
-from arcgis.gis import GIS
-https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{ZOOM_LEVEL}/{y}/{x}
-```
 
+4. ArcGIS API Configuration
+```bash
+# Use the ArcGIS API for Python to fetch satellite tiles
+from arcgis.gis import GIS
+
+# Authenticate with your account
+gis = GIS("https://www.arcgis.com", "YOUR_USERNAME", "YOUR_PASSWORD")
+
+# Access World Imagery
+world_imagery = gis.content.get("10df2279f9684e4a9f6a7f08febac2a9")
+```
 ## Model Architecture
 
 The system utilizes a **Late Fusion Strategy** to integrate heterogeneous data sources.
@@ -75,3 +80,29 @@ To ensure the model was learning relevant spatial features rather than noise, we
 **Key Observations:**
 * **Positive Value Drivers:** Large canopy cover (trees), proximity to blue spaces (water), and low road density in suburban areas.
 * **Negative Value Drivers:** Industrial proximity, high concrete density, and poor "curb appeal" signatures.
+
+### 3. Discussion & Challenges
+The current results show a higher MAE for the multimodal model compared to the tabular baseline. This is a common challenge in multimodal learning known as Sub-optimal Feature Fusion.
+
+1. The **"Dominant Modality"** Problem: Tabular features like sqft_living have a very strong linear correlation with price, causing the model to initially ignore the visual features.
+
+2. Resolution Bottleneck: Standard 224x224 chips may lose fine-grained details (like roof condition) that significantly impact price.
+
+3. Environmental Context: Visual data currently acts as a regularizer. It provides context for outliers (e.g., why a large house is cheap due to industrial proximity) even if it doesn't improve the overall average error yet.
+
+### 4. Deliverables
+1. Prediction File: predictions.csv containing property IDs and estimated market values.
+
+2. Project Report: A detailed PDF covering the Geospatial EDA and architecture trade-offs.
+
+3. Source Code: Reproducible PyTorch scripts and data fetching logic.
+
+
+## License
+This project is licensed under the MIT License.
+
+Copyright (c) 2026 [Tanisha Erugu]
+
+Permission is hereby granted to use, copy, modify, and distribute this software for any purpose with or without fee, provided that the above copyright notice and this permission notice appear in all copies.
+
+---
